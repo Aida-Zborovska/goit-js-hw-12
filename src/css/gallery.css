@@ -1,0 +1,37 @@
+.gallery {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  width: 1128px;
+  margin: 32px auto;
+}
+.gallery-item {
+  width: calc((100% - 48px) / 3);
+  border: #808080 solid 1px;
+}
+.gallery-image {
+  object-fit: cover;
+  aspect-ratio: 1.8;
+  width: 100%;
+  cursor: zoom-in;
+  &:hover {
+    border: #4e75ff solid 2px;
+  }
+}
+.sl-overlay {
+  background: #2e2f42cc;
+}
+.image-info {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.info-point {
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+}
+.info-point-label {
+  font-weight: 600;
+}

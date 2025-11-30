@@ -1,0 +1,45 @@
+.loader {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: block;
+  margin: 32px auto;
+  position: relative;
+  color: #4e75ff;
+  box-sizing: border-box;
+  animation: animloader 1s linear infinite alternate;
+}
+
+@keyframes animloader {
+  0% {
+    box-shadow: -38px -12px, -14px 0, 14px 0, 38px 0;
+  }
+  33% {
+    box-shadow: -38px 0px, -14px -12px, 14px 0, 38px 0;
+  }
+  66% {
+    box-shadow: -38px 0px, -14px 0, 14px -12px, 38px 0;
+  }
+  100% {
+    box-shadow: -38px 0, -14px 0, 14px 0, 38px -12px;
+  }
+}
+
+.load-more {
+  min-width: 125px;
+  margin: 32px auto;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  background: #4e75ff;
+  color: #ffffff;
+  display: block;
+  outline: none;
+  &:hover,
+  &:focus-visible {
+    background: #6c8cff;
+  }
+}
+.hidden {
+  display: none;
+}
