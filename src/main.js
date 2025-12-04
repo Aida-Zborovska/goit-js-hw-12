@@ -10,13 +10,20 @@ import {
 } from './js/render-functions';
 
 let query;
-let page;
+let currentPage;
 let totalPages;
 const form = document.querySelector('.form');
 const loadMoreButton = document.querySelector('.load-more');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      showMessage(`We're sorry, but you've reached the end of search results`);
+    }
+  });
+});
 
 form.addEventListener('submit', formSubmitHandler);
-loadMoreButton.addEventListener('click', loadMoreButtonHandler);
+loadMoreButton.addEventListener('click', loadMore);
 
 async function formSubmitHandler(e) {
   e.preventDefault();
@@ -24,43 +31,77 @@ async function formSubmitHandler(e) {
   if (!queryCandidate) {
     return;
   }
-  query = queryCandidate;
-  page = 1;
   hideLoadMoreButton();
   clearGallery();
   showLoader();
+
+  query = queryCandidate;
+  currentPage = 1;
+
   form.reset();
   try {
     const { hits: images, totalHits: totalImages } = await getImagesByQuery(
       query,
-      page
+      currentPage
     );
     totalPages = Math.ceil(totalImages / 15);
-    if (totalPages > 1) {
-      showLoadMoreButton();
-    }
+
     images.length > 0
       ? createGallery(images)
       : showMessage(
           'Sorry, there are no images matching your search query. Please try again!'
         );
+    if (totalPages > 1) {
+      showLoadMoreButton();
+    }
+    endGalleryHandler();
   } catch (err) {
     console.error(err);
   }
   hideLoader();
 }
 
-async function loadMoreButtonHandler() {
-  page += 1;
+async function loadMore() {
+  showLoader();
+  currentPage += 1;
+  try {
+    const { hits: images } = await getImagesByQuery(query, currentPage);
+    createGallery(images);
+    endGalleryHandler();
+    scrollGallery();
+  } catch (err) {
+    console.error(err);
+  }
+  hideLoader();
 }
 
 function showMessage(message) {
   iziToast.show({
     message: message,
     position: 'topRight',
-    messageColor: '#FFFFFF',
-    backgroundColor: '#EF4040',
-    progressBarColor: '#B51B1B',
     maxWidth: '432px',
+    color: 'blue',
   });
+}
+
+function scrollGallery() {
+  const card = document.querySelector('.gallery-item');
+  const cardHeight = card.getBoundingClientRect().height;
+  const gapPx = getComputedStyle(document.querySelector('.gallery')).gap;
+  const gap = parseInt(gapPx, 10);
+  const scrollHeight = cardHeight * 2 + gap;
+
+  window.scrollBy({
+    top: scrollHeight,
+    behavior: 'smooth',
+  });
+}
+
+function endGalleryHandler() {
+  if (currentPage !== totalPages) {
+    return;
+  }
+  hideLoadMoreButton();
+  const target = document.querySelector('.gallery .gallery-item:last-child');
+  observer.observe(target);
 }
