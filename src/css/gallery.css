@@ -7,6 +7,7 @@
 }
 .gallery-item {
   width: calc((100% - 48px) / 3);
+  height: 240px;
   border: #808080 solid 1px;
 }
 .gallery-image {

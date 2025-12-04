@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export default function getImagesByQuery(query, page) {
+export default async function getImagesByQuery(query, page) {
   const params = {
     key: '53321063-39b236969f2c986560565235a',
     q: query,
@@ -10,7 +10,6 @@ export default function getImagesByQuery(query, page) {
     page: page,
     per_page: 15,
   };
-  return axios
-    .get('https://pixabay.com/api/', { params })
-    .then(res => res.data);
+  const response = await axios.get('https://pixabay.com/api/', { params });
+  return response.data;
 }

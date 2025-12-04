@@ -14,13 +14,6 @@ let currentPage;
 let totalPages;
 const form = document.querySelector('.form');
 const loadMoreButton = document.querySelector('.load-more');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      showMessage(`We're sorry, but you've reached the end of search results`);
-    }
-  });
-});
 
 form.addEventListener('submit', formSubmitHandler);
 loadMoreButton.addEventListener('click', loadMore);
@@ -29,34 +22,47 @@ async function formSubmitHandler(e) {
   e.preventDefault();
   const queryCandidate = form.elements['search-text'].value.trim();
   if (!queryCandidate) {
+    showMessage(
+      `Search query cannot be empty. Please type something in the form`,
+      'yellow'
+    );
     return;
   }
   hideLoadMoreButton();
-  clearGallery();
   showLoader();
+  clearGallery();
 
   query = queryCandidate;
   currentPage = 1;
 
-  form.reset();
   try {
     const { hits: images, totalHits: totalImages } = await getImagesByQuery(
       query,
       currentPage
     );
-    totalPages = Math.ceil(totalImages / 15);
 
-    images.length > 0
-      ? createGallery(images)
-      : showMessage(
-          'Sorry, there are no images matching your search query. Please try again!'
-        );
+    if (images.length === 0) {
+      showMessage(
+        'Sorry, there are no images matching your search query. Please try again!'
+      );
+      hideLoader();
+      return;
+    }
+    totalPages = Math.ceil(totalImages / 15);
+    createGallery(images);
     if (totalPages > 1) {
       showLoadMoreButton();
+    } else {
+      hideLoadMoreButton();
+      showMessage(`We're sorry, but you've reached the end of search results`);
     }
-    endGalleryHandler();
+    form.reset();
   } catch (err) {
     console.error(err);
+    showMessage(
+      `Oops! Something went wrong with the API call. Please refresh the page or try again`,
+      'red'
+    );
   }
   hideLoader();
 }
@@ -67,20 +73,27 @@ async function loadMore() {
   try {
     const { hits: images } = await getImagesByQuery(query, currentPage);
     createGallery(images);
-    endGalleryHandler();
     scrollGallery();
+    if (currentPage === totalPages) {
+      hideLoadMoreButton();
+      showMessage(`We're sorry, but you've reached the end of search results`);
+    }
   } catch (err) {
     console.error(err);
+    showMessage(
+      `Oops! Something went wrong with the API call. Please refresh the page or try again`,
+      'red'
+    );
   }
   hideLoader();
 }
 
-function showMessage(message) {
+function showMessage(message, color) {
   iziToast.show({
     message: message,
     position: 'topRight',
     maxWidth: '432px',
-    color: 'blue',
+    color: color ? color : 'blue',
   });
 }
 
@@ -95,13 +108,4 @@ function scrollGallery() {
     top: scrollHeight,
     behavior: 'smooth',
   });
-}
-
-function endGalleryHandler() {
-  if (currentPage !== totalPages) {
-    return;
-  }
-  hideLoadMoreButton();
-  const target = document.querySelector('.gallery .gallery-item:last-child');
-  observer.observe(target);
 }
